@@ -16,6 +16,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         libgl1 \
         libglib2.0-0 \
+        curl \
+        tcsh \
+        bc \
+        tar \
+        gzip \
+        unzip \
+        libgomp1 \
+        libgsl-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
  
@@ -30,15 +38,6 @@ RUN pip install --no-cache-dir \
     && find /usr/local/lib/python3.11 -type d -name "__pycache__" -exec rm -rf {} + \
     && find /usr/local/lib/python3.11 -type d \( -name "tests" -o -name "test" \) -exec rm -rf {} + \
     && rm -rf /root/.cache /tmp/*
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        curl \
-        tcsh \
-        bc \
-        tar \
-        libgomp1 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
 
 RUN curl -fsSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     | tar -xz -C /opt && \

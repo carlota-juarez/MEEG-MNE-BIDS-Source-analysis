@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l mem=16gb
+#PBS -l mem=32gb
 #PBS -l walltime=01:00:00
 set -e
 
@@ -20,7 +20,7 @@ export SINGULARITYENV_MKL_NUM_THREADS=1
 export SINGULARITYENV_NUMEXPR_NUM_THREADS=1
 export SINGULARITYENV_VECLIB_MAXIMUM_THREADS=1
 export SINGULARITY_DOCKER_INSECURE=1
-export APPTAINER_DOCKER_INSECURE=1
+export GODEBUG=http2client=0
 
 #python main.py
 
