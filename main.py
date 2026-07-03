@@ -1,12 +1,19 @@
+# Copyright (c) 2026 brainlife.io
+
 # This file is a MNE python-based brainlife.io App
 
-# Carlota Juárez Alonso
+# Author: Guiomar Niso Galán
+# Author: Carlota Juárez Alonso
+# Neuroimaging Group, Cajal Neuroscience Center, CSIC
+
+# 03/07/2026
 
 # Set up enviroment
 
 import json
 from pathlib import Path
 import subprocess
+import os 
 from shutil import copyfile, rmtree, copytree
 import mne
 import mne_bids
@@ -196,12 +203,36 @@ with open(file_name, 'w') as f:
 
 # Run python script
 
+needs_recon_all = run_source_estimation and not use_template_mri
+
+if needs_recon_all:
+    # recon-all requires a freesurfer license file
+    fs_license = config.get('fs_license', None)
+    fs_home = os.environ.get('FREESURFER_HOME', '/opt/freesurfer')
+    license_target = Path(fs_home)/'license.txt'
+    if fs_license:
+        copyfile(Path(fs_license).resolve(), license_target)
+    if not license_target.exists():
+        raise FileNotFoundError("Provide a valid license in the 'fs_license' parameter, or set 'use_template_mri' to skip recon-all")
+    steps = "freesurfer,source"
+else:
+    steps = "source"
+
+command = ["mne_bids_pipeline", f"--config={file_name}", f"--steps={steps}"]
+
+try:
+    subprocess.run(command, check=True)
+except subprocess.CalledProcessError as e:
+    raise e
+
+'''
 command = ["mne_bids_pipeline", f"--config={file_name}", "--steps=source"]
 
 try:
     subprocess.run(command, check=True)
 except subprocess.CalledProcessError as e:
     raise e
+'''
 
 # Find the reports and make a copy in out_html folder
 
