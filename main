@@ -22,14 +22,5 @@ export SINGULARITYENV_VECLIB_MAXIMUM_THREADS=1
 export SINGULARITY_DOCKER_INSECURE=1
 export GODEBUG=http2client=0
 
-#python main.py
-
-#esta no me da autenticacion
-#singularity exec docker://mnepython/mne:v1.6.1 python3 main.py
-
-
-#Guiomar meg
-#singularity exec docker://brainlife/mne:0.23dev python3 main.py
-
 # Mi propia imagen pero da error out of memory
-singularity exec -e docker://ghcr.io/carlota-juarez/app-mne-bids:full python3 ./main.py
+singularity exec -e docker://ghcr.io/carlota-juarez/app-mne-bids:full python3 main.py
