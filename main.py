@@ -228,8 +228,11 @@ if needs_recon_all:
     if fs_license:
         with open(license_target, 'w') as file:
             file.write(fs_license)
-        os.environ['FS_LICENSE'] = str(license_target.resolve())
-    if not license_target.exists() and not os.environ.get('FS_LICENSE'):
+        #os.environ['FS_LICENSE'] = str(license_target.resolve())
+    
+    if license_target.exists():
+        f.write(f"freesurfer_license = '{str(license_target.resolve())}'\n")
+    if not os.environ.get('FS_LICENSE'):
         raise FileNotFoundError("Provide a valid license in the 'fs_license' parameter or set 'use_template_mri' to skip recon-all")
     steps = "freesurfer,source"
 
