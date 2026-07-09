@@ -126,7 +126,15 @@ with open(file_name, 'w') as f:
     subjects_dir = config.get('subjects_dir', None)
     if not subjects_dir:
         subjects_dir = deriv_root/'freesurfer'/'subjects'
-        subjects_dir.mkdir(parents = True, exist_ok = True)
+    subjects_dir = Path(subjects_dir)
+    subjects_dir.mkdir(parents = True, exist_ok = True)
+
+    # Avoid network latency by copying fsaverage from the Docker image
+    fsaverage_image = Path('/opt/mne_data/subjects/fsaverage')
+    target_fsaverage = subjects_dir/'fsaverage'
+    if fsaverage_image.exists() and not target_fsaverage.exists():
+        copytree(baked_fsaverage, target_fsaverage)
+
     f.write(f"subjects_dir = '{subjects_dir}'\n")
 
     # BEM surface

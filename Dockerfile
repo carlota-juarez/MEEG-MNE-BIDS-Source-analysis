@@ -67,6 +67,8 @@ RUN pip install --no-cache-dir \
     && find /usr/local/lib/python3.11 -type d \( -name "tests" -o -name "test" \) -exec rm -rf {} + \
     && rm -rf /root/.cache /tmp/*
 
+RUN python -c "import mne; mne.datasets.fetch_fsaverage(subjects_dir='/opt/mne_data/subjects')"
+
 RUN curl -fsSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     | tar -xz -C /opt && \
     rm -rf \
