@@ -45,6 +45,9 @@ if not bids_root:
 bids_root_path = Path(bids_root).resolve()
 
 t1 = config.get('t1', None)
+if t1 == "" or t1 == "null":
+    t1_path = None
+
 if t1:
     t1_path = Path(t1).resolve()
 else:
@@ -140,8 +143,8 @@ with open(file_name, 'w') as f:
     # BEM surface
     # When this parameter is not defined, FreeSurfer runs recon-all
     use_template_mri = config.get('use_template_mri', None)
-    if use_template_mri:
-        f.write(f"use_template_mri = '{use_template_mri}'\n")
+    if use_template_mri == "" or use_template_mri == "null":
+        use_template_mri = None
     
     adjust_coreg = config.get('adjust_coreg', False)
     f.write(f"adjust_coreg = {adjust_coreg}\n")
@@ -246,6 +249,8 @@ with open(file_name, 'w') as f:
         steps = "freesurfer,source"
 
     else:
+        if use_template_mri:
+            f.write(f"use_template_mri = '{use_template_mri}'\n")
         steps = "source"
 
 # Run python script
