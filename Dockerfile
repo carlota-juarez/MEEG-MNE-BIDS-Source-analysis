@@ -1,7 +1,7 @@
 FROM python:3.11-slim
  
 ENV DEBIAN_FRONTEND=noninteractive \
-    VTK_DEFAULT_OPENGL_WINDOW=vtkOSOpenGLRenderWindow
+    VTK_DEFAULT_OPENGL_WINDOW=vtkOSOpenGLRenderWindow \
     PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     MNE_BROWSER_BACKEND=matplotlib \
