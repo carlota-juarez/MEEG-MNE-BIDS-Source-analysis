@@ -25,8 +25,14 @@ os.environ['MNE_3D_BACKEND'] = 'pyvista'
 from shutil import copyfile, rmtree, copytree, copy
 import mne
 import mne_bids
-import logging
 from mne.viz import set_3d_backend
+import vkt
+import logging
+
+# Saber cuales son las versiones
+logger.info(f"MNE version: {mne.__version__}")
+logger.info(f"PyVista version: {pyvista.__version__}")
+logger.info(f"VTK version: {vtk.vtkVersion().GetVTKVersion()}")
 
 # Logger configuration
 
@@ -41,7 +47,7 @@ def generate_interactive_3d_report(subjects_dir, fs_subject, deriv_root, html_re
     # Devuelve una lista de tuplas (etiqueta, nombre_de_fichero) con lo que se generó correctamente.
     import pyvista as pv
     pv.OFF_SCREEN = True
-    mne.viz.set_3d_backend('pyvista')
+    set_3d_backend("pyvista")
     
     # directorio de las figuras intercativas
     interactive_dir = html_report_dir / 'interactive_3d'
@@ -77,9 +83,15 @@ def generate_interactive_3d_report(subjects_dir, fs_subject, deriv_root, html_re
                     surfaces=['head'],
                     coord_frame='mri',
                     show_axes=True,
+                    show = False,
                 )
             out_path = interactive_dir / f'sub-{subject}_coreg_bem.html'
-            fig.plotter.export_html(str(out_path))
+            fig.plotter.screenshot(interactive_dir / "alignment.png")
+            try:
+                fig.plotter.export_html("alignment.html")
+                fig.plotter.export_html(str(out_path))
+            except Exception as err:
+                logger.warning(err)
             fig.plotter.close()
             generated.append(('Coregistracion y superficies BEM', out_path.name))
             logger.info(f"Figura interactiva de coregistro/BEM guardada en {out_path}")
@@ -100,9 +112,15 @@ def generate_interactive_3d_report(subjects_dir, fs_subject, deriv_root, html_re
                 backend='pyvista',
                 time_viewer=False,
                 show_traces=False,
+                show=False,
             )
             out_path = interactive_dir / f'sub-{subject}_source_estimate.html'
-            brain.plotter.export_html(str(out_path))
+            brain.save_image(interactive_dir/"source.png")
+            try:
+                brain.plotter.export_html("brain.html")
+                brain.plotter.export_html(str(out_path))
+            except Exception as err:
+                logger.warning(err)
             brain.close()
             generated.append(('Estimacion de fuente', out_path.name))
             logger.info(f"Figura interactiva de la estimacion de fuente guardada en {out_path}")
