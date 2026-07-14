@@ -39,7 +39,7 @@ jobs:
       - name: Update main.txt with new image digest
         run: |
           IMAGE_REF="ghcr.io/carlota-juarez/app-mne-bids@${{ steps.build.outputs.digest }}"
-          sed -i -E "s|docker://ghcr\.io/carlota-juarez/app-mne-bids(@sha256:[a-f0-9]+|:full)|docker://${IMAGE_REF}|" main
+          sed -i -E "s#docker://ghcr\.io/carlota-juarez/app-mne-bids(@sha256:[a-f0-9]+|:full)#docker://${IMAGE_REF}#" main
           grep -q "$IMAGE_REF" main && echo "main actualizado correctamente" || (echo "ERROR: main.txt no se actualizó" && exit 1)
 
       - name: Commit updated main
