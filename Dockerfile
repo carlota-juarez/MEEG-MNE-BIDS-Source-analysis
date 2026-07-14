@@ -58,10 +58,11 @@ RUN pip install --no-cache-dir \
         "matplotlib" \
         "scikit-learn" \
         "PyQt5" \
+        "pyvista" \
+        "pyvistaqt" \
         mne \
         mne-bids \
         mne-bids-pipeline==1.10.1 \
-        pyvista \
     && find /usr/local/lib/python3.11 -type d -name "__pycache__" -exec rm -rf {} + \
     && find /usr/local/lib/python3.11 -type d \( -name "tests" -o -name "test" \) -exec rm -rf {} + \
     && rm -rf /root/.cache /tmp/*
