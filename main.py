@@ -14,11 +14,14 @@ import subprocess
 import os 
 
 # hay que fijarlas antes de importar pyvista/mne.viz
-os.environ.setdefault('PYVISTA_OFF_SCREEN', 'true')
-os.environ.setdefault('MPLBACKEND', 'Agg')
-os.environ.setdefault('MNE_3D_OPTION_ANTIALIAS', 'false')
-os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
-os.environ.setdefault('LIBGL_ALWAYS_SOFTWARE', '1')
+os.environ['PYVISTA_OFF_SCREEN'] = 'true'
+os.environ['MPLBACKEND'] = 'Agg'
+os.environ['MNE_3D_OPTION_ANTIALIAS'] = 'false'
+os.environ['QT_QPA_PLATFORM'] = 'offscreen'
+os.environ['LIBGL_ALWAYS_SOFTWARE'] = '1'
+
+# Desactivamos el backend 3D interactivo para evitar que VTK busque una ventana física
+os.environ['MNE_3D_BACKEND'] = 'pyvista'
 
 from shutil import copyfile, rmtree, copytree, copy
 import mne
