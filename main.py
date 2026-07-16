@@ -208,21 +208,20 @@ file_name = __location__/'pipeline_config.py'
 # Inputs from the interface web to MNE variables
 
 with open(file_name, 'w') as f:
-    
+    #----------------------------------------------------------------------------------------------
+    # BrainLife runs in headless mode, so we need configuration variables to ensure that the figures are generated in the background
+    # Write instructions in the configuration file to set up 3D rendering before the pipeline runs
     f.write("import os\n")
     f.write("os.environ['PYVISTA_OFF_SCREEN'] = 'true'\n")
     f.write("os.environ['MPLBACKEND'] = 'Agg'\n")
     f.write("os.environ['MNE_3D_OPTION_ANTIALIAS'] = 'false'\n\n")
     f.write("os.environ['VTK_DEFAULT_OPENGL_WINDOW'] = 'vtkOSOpenGLRenderWindow'\n\n")
-
-    #Con vtk-osmesa el renderizado es 100% por software
     f.write("import pyvista\n")
     f.write("pyvista.OFF_SCREEN = True\n")
-
     f.write("import mne\n")
     f.write("mne.viz.set_3d_backend('pyvista')\n\n")
+    # ---------------------------------------------------------------------------------------------
 
-    # -----
     f.write(f"bids_root = '{bids_root_path}'\n")
     f.write(f"deriv_root = '{deriv_root}'\n")
     f.write(f"t1 = '{t1}'\n")
@@ -270,7 +269,7 @@ with open(file_name, 'w') as f:
     if task_is_rest and not conditions and run_source_estimation:
         logger.warning("task_is_rest=True and no 'conditions' were provided, no evoked data created at the sensor-analysis stage, so source estimation cannot run for this dataset")
         run_source_estimation = False
-        #the following steps will not be run, the html report will be the same as the one after sensor analysis
+        # The following steps will not be run, the html report will be the same as the one after sensor analysis
     f.write(f"run_source_estimation = {run_source_estimation}\n")
 
     subjects_dir = config.get('subjects_dir', None)
@@ -411,9 +410,9 @@ try:
 except subprocess.CalledProcessError as e:
     raise e
 
-# GENERAMOS VISUALIZACION 3D INTERACTIVAS
-# fs_subject: sujeto de FreeSurfer que realmente contiene las superficies
-# (fsaverage si se uso plantilla, o el sujeto reconstruido con recon-all)
+# CREATE INTERACTIVE 3D VISUALIZATION
+# fs_subject: FreeSurfer subject that actually contains the surfaces
+# (fsaverage if a template was used, or the subject reconstructed with recon-all)
 if use_template_mri:
     fs_subject = use_template_mri
 elif (subjects_dir/f"sub-{subject}").exists():
@@ -421,12 +420,12 @@ elif (subjects_dir/f"sub-{subject}").exists():
 else:
     fs_subject = subject
 
-# mostrar contenido de lo que hay en deriv_root
+# Display the content of deriv_root
 logger.info("Contenido de deriv_root")
 for p in sorted(deriv_root.rglob("*")):
     if p.is_file() and p.suffix in ('.fif', '.stc', '.gz'):
         logger.info(str(p.relative_to(deriv_root)))
-logger.info("Fin del contenido deriv_root")
+logger.info("End of deriv_root content")
 
 try:
     generated_3d_figures = generate_interactive_3d_report(
@@ -437,7 +436,7 @@ try:
         subject=subject,
     )
 except Exception as e:
-    logger.warning(f"No se pudieron generar las visualizaciones 3D interactivas: {e}")
+    logger.warning(f"The interactive 3D visualizations could not be generated: {e}")
     generated_3d_figures = []
 
 # Find the reports and make a copy in out_html folder
@@ -448,7 +447,7 @@ interactive_link_html = (
     "<div style='padding:12px;margin-top:16px;background:#eef3ff;"
     "border-top:2px solid #6699cc;font-family:sans-serif;'>"
     "<a href='interactive_3d/index.html' target='_blank'>"
-    "Ver visualizaciones 3D interactivas (rota y haz zoom con el raton)</a></div>"
+    "Drag with the left mouse button to rotate and scroll the mouse wheel to zoom</a></div>"
 )
 
 for path in real_deriv_root.rglob("*.html"):
@@ -465,4 +464,4 @@ for path in real_deriv_root.rglob("*.html"):
                     content += interactive_link_html
                 dest.write_text(content, encoding='utf-8')
             except Exception as e:
-                logger.warning(f"No se pudo insertar el enlace a las figuras interactivas en {dest.name}: {e}")
+                logger.warning(f"The link to the interactive figures could not be inserted in {dest.name}: {e}")
