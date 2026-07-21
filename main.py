@@ -252,6 +252,47 @@ def generate_true_3d_interactive_report(subjects_dir, fs_subject, deriv_root, ht
     report.save(str(output_html_path), overwrite=True, open_browser=False)
     logger.info(f"Reporte 3D Interactivo generado exitosamente en: {output_html_path}")
 
+import trimesh
+
+def export_3d_mesh_files(subjects_dir, fs_subject, html_report_dir):
+    """
+    Lee las mallas corticales (FreeSurfer/MNE) y las guarda como archivos 3D reales (.gltf y .obj)
+    """
+    models_dir = html_report_dir / 'models_3d'
+    models_dir.mkdir(parents=True, exist_ok=True)
+    
+    subj_path = Path(subjects_dir) / fs_subject / 'surf'
+    lh_pial = subj_path / 'lh.pial'
+    rh_pial = subj_path / 'rh.pial'
+    
+    meshes_to_combine = []
+    
+    # Cargar hemisferio izquierdo
+    if lh_pial.exists():
+        coords_l, faces_l = mne.read_surface(str(lh_pial))
+        meshes_to_combine.append(trimesh.Trimesh(vertices=coords_l, faces=faces_l))
+        
+    # Cargar hemisferio derecho
+    if rh_pial.exists():
+        coords_r, faces_r = mne.read_surface(str(rh_pial))
+        meshes_to_combine.append(trimesh.Trimesh(vertices=coords_r, faces=faces_r))
+        
+    if meshes_to_combine:
+        # Unir ambos hemisferios en una sola estructura 3D
+        combined_brain = trimesh.util.concatenate(meshes_to_combine)
+        
+        # Exportar a formato GLTF (estándar WebGL / 3D)
+        gltf_path = models_dir / f"{fs_subject}_brain_3d.gltf"
+        combined_brain.export(str(gltf_path))
+        logger.info(f"Modelo 3D exportado con éxito en: {gltf_path}")
+
+        # Exportar a formato OBJ (compatibilidad universal)
+        obj_path = models_dir / f"{fs_subject}_brain_3d.obj"
+        combined_brain.export(str(obj_path))
+        logger.info(f"Modelo 3D exportado con éxito en: {obj_path}")
+    else:
+        logger.warning(f"No se encontraron superficies pial en {subj_path}")
+
 
 
 # Current path
@@ -586,6 +627,15 @@ generate_true_3d_interactive_report(
     html_report_dir=html_report_dir,
     subject=subject
 )
+
+try:
+    export_3d_mesh_files(
+        subjects_dir=subjects_dir,
+        fs_subject=fs_subject,
+        html_report_dir=html_report_dir
+    )
+except Exception as e:
+    logger.warning(f"No se pudo exportar la malla 3D: {e}")
 
 # Copiar además todos los reportes nativos que generó mne-bids-pipeline
 for path in deriv_root.resolve().rglob("*.html"):
