@@ -742,6 +742,7 @@ with open(file_name, 'w') as f:
             raise FileNotFoundError(
                 "No FreeSurfer license available. Provide one in the 'fs_license' parameter or make sure the computing resource exposes FS_LICENSE")
 
+        os.environ['FS_LICENSE'] = str(writable_fs_home.resolve())
         os.environ['FS_LICENSE'] = str(license_target.resolve())
         steps = "freesurfer,source"
 
@@ -749,6 +750,8 @@ with open(file_name, 'w') as f:
         if use_template_mri:
             f.write(f"use_template_mri = '{use_template_mri}'\n")
         steps = "source"
+
+pipeline_start_time = time.time()
 
 # Run python script
 
