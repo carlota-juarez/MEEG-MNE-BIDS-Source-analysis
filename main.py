@@ -16,6 +16,7 @@ import time
 from shutil import copyfile, rmtree, copytree, copy
 import logging
 import numpy as np
+import re
 
 # Logger configuration
 
@@ -570,6 +571,19 @@ with open(file_name, 'w') as f:
     subject = '01'
     f.write(f"subjects = ['{subject}']\n")
 
+    # Which file to use 
+    proc_priority = ['clean', 'sss', 'filt']  
+    found_procs = set()
+    for fp in deriv_root.rglob(f"sub-{subject}_*_raw.fif"):
+        m = re.search(r"_proc-([A-Za-z0-9]+)_raw\.fif$", fp.name)
+        if m:
+            found_procs.add(m.group(1))
+
+    proc_tag = next((p for p in proc_priority if p in found_procs), None)
+    if proc_tag:
+        f.write(f"proc = '{proc_tag}'\n")
+        logger.info(f"Multiple processed versions found {sorted(found_procs)}; using proc-{proc_tag} as pipeline input")
+
     task = config.get('task', None)
     if task:
         f.write(f"task = '{task}'\n")
@@ -708,29 +722,33 @@ with open(file_name, 'w') as f:
         extension = "".join(t1_path.suffixes)
         copyfile(t1_path, anat_dir/f'sub-{subject}_T1w{extension}')
 
-        # Absolute path
-        license_target = Path(os.getcwd()).resolve() / 'license.txt'
-        # recon-all requires a freesurfer license file
+        # Compute resource Freesurfer license or user license
+        license_target = Path(os.environ.get('FREESURFER_HOME', '/opt/freesurfer')) / 'license.txt'
+
         fs_license = config.get('fs_license', None)
         if fs_license and fs_license.strip() != "":
+            # The user has provided their own license in Brainlife parameters
             with open(license_target, 'w') as file:
                 file.write(fs_license.strip() + "\n")
-        
-        if license_target.exists():
-            f.write(f"freesurfer_license = '{str(license_target.resolve())}'\n")
-            # Además de escribirlo en el archivo, se lo inyectamos a la fuerza al entorno de procesos de Python
-            os.environ['FS_LICENSE'] = str(license_target.resolve())
-        else:
-            raise FileNotFoundError("Provide a valid license in the 'fs_license' parameter or set 'use_template_mri' to skip recon-all")
-        
+            logger.info("Using FreeSurfer license provided by the user via 'fs_license' parameter")
+        elif not license_target.exists():
+            # If the user has not provided a license, reuse the one specified by the computing resource (FS_LICENSE)
+            resource_license = os.environ.get('FS_LICENSE')
+            if resource_license and Path(resource_license).exists():
+                copyfile(resource_license, license_target)
+                logger.info(f"Using FreeSurfer license already available on the computing resource ({resource_license})")
+
+        if not license_target.exists():
+            raise FileNotFoundError(
+                "No FreeSurfer license available. Provide one in the 'fs_license' parameter or make sure the computing resource exposes FS_LICENSE")
+
+        os.environ['FS_LICENSE'] = str(license_target.resolve())
         steps = "freesurfer,source"
 
     else:
         if use_template_mri:
             f.write(f"use_template_mri = '{use_template_mri}'\n")
         steps = "source"
-
-pipeline_start_time = time.time()
 
 # Run python script
 
