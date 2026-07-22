@@ -32,4 +32,4 @@ export SINGULARITYENV_VTK_DEFAULT_OPENGL_WINDOW="vtkOSOpenGLRenderWindow"
 export SINGULARITYENV_FS_LICENSE="$FS_LICENSE"
 
 # Own image (uploaded to GitHub)
-singularity exec -e docker://ghcr.io/carlota-juarez/app-mne-bids@sha256:d3b1e2677f67c4184052ba339164ba2fe655b7da2c3b4bc84ba2de3b1fe895ba python3 main.py
+singularity exec -e docker://ghcr.io/carlota-juarez/app-mne-bids@sha256:68f14c878fc7cc8797d8e359e4786d323779e844a14acee2181ab24e71daca27 python3 main.py
