@@ -779,7 +779,7 @@ if needs_recon_all:
             "or ensure the computing resource exposes FS_LICENSE."
         )
 
-    mni_startup = original_fs_home / 'mni' / 'lib' / 'perl5' / 'MNI' / 'Startup.pm'
+    mni_startup = original_fs_home / 'mni' / 'share' / 'perl5' / 'MNI' / 'Startup.pm'
     if not mni_startup.exists():
         raise FileNotFoundError(
             f"FreeSurfer MNI Perl modules not found at {mni_startup}. "
@@ -797,7 +797,8 @@ if needs_recon_all:
     os.environ['FREESURFER_HOME'] = fs_path
     os.environ['FS_LICENSE'] = license_path
     os.environ['SUBJECTS_DIR'] = subjects_dir_str
-    os.environ['PERL5LIB'] = f"{fs_path}/mni/lib/perl5"
+    os.environ['PERL5LIB'] = f"{fs_path}/mni/share/perl5"
+    os.environ['MNI_PERL5LIB'] = f"{fs_path}/mni/share/perl5"
     os.environ['MNI_DIR'] = mni_dir
     os.environ['MINC_BIN_DIR'] = minc_bin_dir
     os.environ['FSFAST_HOME'] = fsfast_home
@@ -811,7 +812,8 @@ if needs_recon_all:
         f.write(f"os.environ['FREESURFER_HOME'] = r'{fs_path}'\n")
         f.write(f"os.environ['FS_LICENSE'] = r'{license_path}'\n")
         f.write(f"os.environ['SUBJECTS_DIR'] = r'{subjects_dir_str}'\n")
-        f.write(f"os.environ['PERL5LIB'] = r'{fs_path}/mni/lib/perl5'\n")
+        f.write(f"os.environ['PERL5LIB'] = r'{fs_path}/mni/share/perl5'\n")
+        f.write(f"os.environ['MNI_PERL5LIB'] = r'{fs_path}/mni/share/perl5'\n")
         f.write(f"os.environ['MNI_DIR'] = r'{mni_dir}'\n")
         f.write(f"os.environ['MINC_BIN_DIR'] = r'{minc_bin_dir}'\n")
         f.write(f"os.environ['FSFAST_HOME'] = r'{fsfast_home}'\n")
