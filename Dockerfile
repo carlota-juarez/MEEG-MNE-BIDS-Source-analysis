@@ -33,6 +33,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libgsl-dev \
         libquadmath0 \
         libgfortran5 \
+        libxmu6 \
+        libxt6 \
+        libxext6 \
         perl \
         libjpeg62-turbo \
         binutils \

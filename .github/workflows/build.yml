@@ -40,10 +40,9 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/carlota-juarez/app-mne-bids:full
-          no-cache: true
           # to reuse unmodified layers across runs
-          #cache-from: type=gha
-          #cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
         # Use the image's digest to reference it from the main (automatic push from the main)
       - name: Update main with new image digest
         run: |
