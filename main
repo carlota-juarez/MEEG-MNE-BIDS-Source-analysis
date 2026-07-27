@@ -32,5 +32,7 @@ export SINGULARITYENV_FREESURFER_HOME="/opt/freesurfer"
 export SINGULARITYENV_PERL5LIB="/opt/freesurfer/mni/lib/perl5"
 export SINGULARITYENV_FS_LICENSE="$FS_LICENSE"
 
+export GODEBUG=http2client=0
+
 # Image digest auto-updated by GitHub Actions on push to main
 singularity exec -e docker://ghcr.io/carlota-juarez/app-mne-bids@sha256:feb3e3167d91f7d495f2e05ee575d749be904160d5d7e1e02b76adf898af3bb6 python3 main.py
