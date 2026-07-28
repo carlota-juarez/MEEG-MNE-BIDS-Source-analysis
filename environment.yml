@@ -1,4 +1,4 @@
-name: app-mne-bids-sensor-analysis
+name: app-mne-bids-sensor-analysis 
 channels:
   - conda-forge
   - defaults

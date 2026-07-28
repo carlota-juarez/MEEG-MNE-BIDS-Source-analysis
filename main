@@ -6,7 +6,7 @@ set -e
 
 # Make output directory
 mkdir -p out_dir
-mkdir -p html_report
+mkdir -p html_report 
 
 # Limit threads to avoid OOM; n_jobs=2 in pipeline_config for recon-all/source
 export OMP_NUM_THREADS=2

@@ -450,7 +450,7 @@ real_deriv_root = deriv_root.resolve()
 
 for path in real_deriv_root.rglob("*.html"):
     if "sub-average" not in path.name:
-        logger.info(f"{path.name} copied to the output")
+        logger.info(f"{path.name} copied to the output") 
         dest = html_report_dir/path.name
         copyfile(path, dest)
 

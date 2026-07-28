@@ -1,5 +1,5 @@
 {
-  "bids_dir": "bids_dir_sensor_test",
+  "bids_dir": "bids_dir_sensor_test", 
   "data_type": "eeg",
   "eeg_template_montage": "standard_1020",
   "meg_ch_types": "meg",

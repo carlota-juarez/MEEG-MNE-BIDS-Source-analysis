@@ -1,4 +1,4 @@
-# MEEG-MNE-BIDS [3]: Source Analysis 
+# MEEG-MNE-BIDS [3]: Source Analysis  
 
 This Brainlife App runs the source-level analysis of MNE-BIDS-pipeline on the derivatives produced by the previous preprocessing App (MNE-BIDS-Pipeline [2]: Sensor Analysis).
 It estimates cortical sources of M/EEG activity for EEG and MEG data, covering the following steps:
