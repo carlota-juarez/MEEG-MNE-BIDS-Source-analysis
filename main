@@ -35,4 +35,4 @@ export SINGULARITYENV_FS_LICENSE="$FS_LICENSE"
 export GODEBUG=http2client=0
 
 # Image digest auto-updated by GitHub Actions on push to main
-singularity exec -e docker://ghcr.io/carlota-juarez/app-mne-bids@sha256:e8a681be8415b3a2d4f8e4262a00ead2adc84ecdc401c4bf4bd85283f58e1f48 python3 main.py
+singularity exec -e docker://ghcr.io/carlota-juarez/app-mne-bids@sha256:afcffb6a382d152a90b0f7e820bb7661f9ac9aa1dfe271d0176754859cd8c69b python3 main.py
