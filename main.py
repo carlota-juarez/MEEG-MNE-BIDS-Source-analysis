@@ -22,8 +22,6 @@ import re
 logging.basicConfig(level = logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-logger.info("New version: 3 correct")
-
 # Configure PyVista so it never attempts to open a window, the plotter is created in “off-screen” mode.
 os.environ['PYVISTA_OFF_SCREEN'] = 'true'
 # Configure Matplot to use the Agg backend (without a GUI)
@@ -37,6 +35,11 @@ os.environ['MNE_3D_BACKEND'] = 'pyvistaqt'
 
 # Set up environment
 import mne
+from mne.coreg import get_mni_fiducials
+from mne.channels import make_dig_montage
+from mne.transforms import Transform
+from mne.io.constants import FIFF
+from mne_bids import BIDSPath, get_anat_landmarks, write_anat
 import pyvista as pv
 pv.OFF_SCREEN = True
 
@@ -273,6 +276,39 @@ with open(file_name, 'w') as f:
     if inverse_targets:
         f.write(f"inverse_targets = {inverse_targets}\n")
 
+
+def write_t1w_coreg_landmarks(subject, subjects_dir, bids_root_path, t1w_bids_file):
+    fs_subject = f"sub-{subject}"
+
+    # Fiducials estimated in the FreeSurfer "mri" 
+    fids_mri = get_mni_fiducials(fs_subject, subjects_dir=subjects_dir)
+    fid_by_ident = {p['ident']: p['r'] for p in fids_mri}
+
+    dig_montage = make_dig_montage(
+        nasion=fid_by_ident[FIFF.FIFFV_POINT_NASION],
+        lpa=fid_by_ident[FIFF.FIFFV_POINT_LPA],
+        rpa=fid_by_ident[FIFF.FIFFV_POINT_RPA],
+        coord_frame='head',
+    )
+    info = mne.create_info(ch_names=['fiducial_placeholder'], sfreq=1000.0, ch_types='misc')
+    info.set_montage(dig_montage, on_missing='ignore')
+
+    identity_trans = Transform('head', 'mri', np.eye(4))
+
+    landmarks = get_anat_landmarks(
+        image=t1w_bids_file,
+        info=info,
+        trans=identity_trans,
+        fs_subject=fs_subject,
+        fs_subjects_dir=subjects_dir,
+    )
+
+    t1w_bids_path = BIDSPath(
+        subject=subject, root=bids_root_path, datatype='anat', suffix='T1w',
+    )
+    write_anat(image=t1w_bids_file, bids_path=t1w_bids_path, landmarks=landmarks, overwrite=True)
+    logger.info(f"Wrote estimated NAS/LPA/RPA landmarks to the T1w JSON sidecar for sub-{subject}")
+
 # Determine pipeline steps
 if not run_source_estimation:
     steps = None
@@ -382,7 +418,24 @@ if needs_recon_all:
 
 # Run python script
 
-if steps is not None:
+if steps == "freesurfer,source":
+    logger.info("Running the 'freesurfer' step first (recon-all)")
+    fs_command = ["mne_bids_pipeline", f"--config={file_name}", "--steps=freesurfer"]
+    try:
+        subprocess.run(fs_command, check=True, env=os.environ.copy())
+    except subprocess.CalledProcessError as e:
+        raise e
+
+    t1w_bids_file = bids_root_path / f'sub-{subject}' / 'anat' / f'sub-{subject}_T1w{extension}'
+    write_t1w_coreg_landmarks(subject, subjects_dir_str, bids_root_path, t1w_bids_file)
+
+    logger.info("Running the 'source' step")
+    source_command = ["mne_bids_pipeline", f"--config={file_name}", "--steps=source"]
+    try:
+        subprocess.run(source_command, check=True, env=os.environ.copy())
+    except subprocess.CalledProcessError as e:
+        raise e
+elif steps is not None:
     command = ["mne_bids_pipeline", f"--config={file_name}", f"--steps={steps}"]
     try:
         subprocess.run(command, check=True, env=os.environ.copy())
